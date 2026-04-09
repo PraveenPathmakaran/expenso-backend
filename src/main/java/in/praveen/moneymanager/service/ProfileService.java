@@ -111,6 +111,7 @@ public class ProfileService {
     public Map<String,Object> authenticateAndGenerateToken(AuthDTO authDTO){
         try {
 
+
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authDTO.getEmail(),authDTO.getPassword()));
             String token = jwtUtil.generateToken(authDTO.getEmail());
             return Map.of(
@@ -119,6 +120,7 @@ public class ProfileService {
             );
 
         } catch (RuntimeException e) {
+            System.out.println(e.toString());
             throw new RuntimeException("Invalid email or password");
         }
     }

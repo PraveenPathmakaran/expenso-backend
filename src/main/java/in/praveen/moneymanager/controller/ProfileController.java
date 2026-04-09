@@ -54,5 +54,11 @@ public class ProfileController {
                     Map.of("message",e.getMessage())
             );
         }
+
+
+    }
+    @GetMapping("/test")
+    public String test(){
+        return "Test Successfully";
     }
 }

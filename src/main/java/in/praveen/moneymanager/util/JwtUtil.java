@@ -5,6 +5,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -15,7 +16,8 @@ import java.util.function.Function;
 public class JwtUtil {
 
     // 🔐 Use a strong secret (Base64 encoded)
-    private static final String SECRET_KEY = "your-256-bit-secret-your-256-bit-secret";
+    @Value("${jwt.secret}")
+    private String SECRET_KEY;
 
     // ⏱ Token validity (e.g., 1 day)
     private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24;
