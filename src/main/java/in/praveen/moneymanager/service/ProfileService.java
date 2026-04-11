@@ -121,7 +121,7 @@ public class ProfileService {
 
         } catch (RuntimeException e) {
             System.out.println(e.toString());
-            throw new RuntimeException("Invalid email or password");
+            throw new RuntimeException("Invalid  email or password");
         }
     }
 }
