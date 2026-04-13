@@ -1,5 +1,6 @@
 package in.praveen.moneymanager.service;
 
+import in.praveen.moneymanager.Mapper.ProfileMapper;
 import in.praveen.moneymanager.dto.AuthDTO;
 import in.praveen.moneymanager.dto.ProfileDTO;
 import in.praveen.moneymanager.entity.ProfileEntity;
@@ -27,48 +28,36 @@ public class ProfileService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final ProfileMapper mapper;
 
+
+    //registration
     public ProfileDTO registerProfile(ProfileDTO profileDTO){
 
-        ProfileEntity newProfile = toEntity(profileDTO);
+        ProfileEntity newProfile =mapper.toEntity(profileDTO);
+
         newProfile.setActivationToken(UUID.randomUUID().toString());
+        newProfile.setPassword(passwordEncoder.encode(newProfile.getPassword()));
         newProfile =  profileRepository.save(newProfile);
+
         //send activation email
         String activationLink = "http://localhost:8080/api/v1.0/activate?token="+newProfile.getActivationToken();
         String subject = "Activate your Money Manger Account";
         String body = "Click on the following link to activate your account " + activationLink;
 
         emailService.sendEmail(newProfile.getEmail(),subject,body);
-       return toDTO(newProfile);
+
+       return mapper.toDto(newProfile);
 
     }
 
-    public ProfileEntity toEntity(ProfileDTO profileDTO){
-        return ProfileEntity
-                .builder()
-                .id(profileDTO.getId())
-                .fullName(profileDTO.getFullName())
-                .email(profileDTO.getEmail())
-                .password(passwordEncoder.encode(profileDTO.getPassword()))
-                .profileImageUrl(profileDTO.getProfileImageUrl())
-                .createdAt(profileDTO.getCreatedAt())
-                .updatedAt(profileDTO.getUpdatedAt())
-                .build();
-    }
-    public ProfileDTO toDTO(ProfileEntity profileEntity){
-        return ProfileDTO
-                .builder()
-                .id(profileEntity.getId())
-                .fullName(profileEntity.getFullName())
-                .email(profileEntity.getEmail())
-                .profileImageUrl(profileEntity.getProfileImageUrl())
-                .createdAt(profileEntity.getCreatedAt())
-                .updatedAt(profileEntity.getUpdatedAt())
-                .build();
-    }
 
+
+    //profile activation
     public boolean activateProfile(String activationToken){
-        return profileRepository.findByActivationToken(activationToken).map(profile ->
+        return profileRepository
+                .findByActivationToken(activationToken)
+                .map(profile ->
         {
             profile.setIsActive(true);
             profileRepository.save(profile);
@@ -76,6 +65,9 @@ public class ProfileService {
         }).orElse(false);
     }
 
+
+
+    //before login checking account activated
     public boolean isAccountActive(String email){
         return  profileRepository.findByEmail(email)
                 .map(ProfileEntity::getIsActive)
@@ -83,10 +75,11 @@ public class ProfileService {
     }
 
     public ProfileEntity getCurrentProfile(){
-        Authentication authentication = SecurityContextHolder.getContext()
-                .getAuthentication();
-     return   profileRepository.findByEmail(authentication.getName())
-               .orElseThrow(()->new UsernameNotFoundException("Profile not found with email: "+authentication.getName()));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+     return profileRepository
+             .findByEmail(authentication.getName())
+             .orElseThrow(()-> new UsernameNotFoundException("Profile not found with email: "+authentication.getName()));
     }
 
     public ProfileDTO getPublicProfile(String email){
@@ -98,20 +91,11 @@ public class ProfileService {
                     .orElseThrow(()->new UsernameNotFoundException("Profile not found with email: "+email));
         }
 
-        return ProfileDTO.builder()
-                .id(currentUser.getId())
-                .fullName(currentUser.getFullName())
-                .email(currentUser.getEmail())
-                .profileImageUrl(currentUser.getProfileImageUrl())
-                .createdAt(currentUser.getCreatedAt())
-                .updatedAt(currentUser.getUpdatedAt())
-                .build();
+        return mapper.toDto(currentUser) ;
     }
 
     public Map<String,Object> authenticateAndGenerateToken(AuthDTO authDTO){
         try {
-
-
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authDTO.getEmail(),authDTO.getPassword()));
             String token = jwtUtil.generateToken(authDTO.getEmail());
             return Map.of(
@@ -121,7 +105,7 @@ public class ProfileService {
 
         } catch (RuntimeException e) {
             System.out.println(e.toString());
-            throw new RuntimeException("Invalid   email or password");
+            throw new RuntimeException("Invalid email or password");
         }
     }
 }

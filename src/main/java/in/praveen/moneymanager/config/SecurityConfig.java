@@ -30,8 +30,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-
-
          httpSecurity
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
@@ -47,10 +45,6 @@ public class SecurityConfig {
         return httpSecurity.build();
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource(){
@@ -63,6 +57,13 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**",configuration);
         return source;
     }
+
+
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+
     @Bean
     public AuthenticationManager authenticationManager(){
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
