@@ -28,6 +28,7 @@ public class CategoryEntity {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
     private String type;
+    private String icon;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_id",nullable = false)
