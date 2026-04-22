@@ -7,6 +7,7 @@ import in.praveen.moneymanager.entity.ProfileEntity;
 import in.praveen.moneymanager.repository.ProfileRepository;
 import in.praveen.moneymanager.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,6 +31,9 @@ public class ProfileService {
     private final JwtUtil jwtUtil;
     private final ProfileMapper mapper;
 
+    @Value("${app.activation.url}")
+    private String activationUrl;
+
 
     //registration
     public ProfileDTO registerProfile(ProfileDTO profileDTO){
@@ -41,7 +45,7 @@ public class ProfileService {
         newProfile =  profileRepository.save(newProfile);
 
         //send activation email
-        String activationLink = "http://localhost:8080/api/v1.0/activate?token="+newProfile.getActivationToken();
+        String activationLink = activationUrl+"/api/v1.0/activate?token="+newProfile.getActivationToken();
         String subject = "Activate your Money Manger Account";
         String body = "Click on the following link to activate your account " + activationLink;
 

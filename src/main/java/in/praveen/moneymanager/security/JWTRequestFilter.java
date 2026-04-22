@@ -29,6 +29,12 @@ public class JWTRequestFilter extends OncePerRequestFilter {
       String email=null;
       String jwt =null;
 
+        String path = request.getServletPath();
+
+        if (path.equals("/register") || path.equals("/login") || path.equals("/activate") || path.equals("/status") || path.equals("/health")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
       if(authHeader!=null&&authHeader.startsWith("Bearer ")){
           jwt = authHeader.substring(7);
           email = jwtUtil.extractUsername(jwt);
