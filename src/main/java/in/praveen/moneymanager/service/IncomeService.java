@@ -10,6 +10,7 @@ import in.praveen.moneymanager.entity.ProfileEntity;
 import in.praveen.moneymanager.repository.CategoryRepository;
 import in.praveen.moneymanager.repository.IncomeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -67,5 +68,11 @@ public class IncomeService {
         ProfileEntity profile = profileService.getCurrentProfile();
         BigDecimal totalExpenses = incomeRepository.findTotalExpenseByProfileId(profile.getId());
         return totalExpenses!=null?totalExpenses:BigDecimal.ZERO;
+    }
+
+    public List<IncomeDTO> filterIncomes(LocalDate startDate, LocalDate endDate, String keyWord, Sort sort) {
+        ProfileEntity profile = profileService.getCurrentProfile();
+        List<IncomeEntity> expenses =    incomeRepository.findByProfileIdAndDateBetweenAndNameContainingIgnoreCase(profile.getId(),startDate,endDate,keyWord,sort);
+        return expenses.stream().map(incomesMapper::toDto).toList();
     }
 }
